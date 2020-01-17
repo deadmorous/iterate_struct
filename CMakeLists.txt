@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(iterate_struct LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_executable(iterate_struct
+    main.cpp
+    iterate_struct.h
+    value_printer.h
+    ptree_converter.h
+    )
