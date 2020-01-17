@@ -7,6 +7,8 @@
 #include <list>
 #include <boost/assert.hpp>
 
+#include "enum_names/enum_names.h"
+
 namespace iterate_struct {
 
 class json_doc_generator
@@ -40,6 +42,16 @@ private:
     {
         rapidjson::Value result;
         result.Set(x, m_doc.GetAllocator());
+        return result;
+    }
+
+    template <
+            class T,
+            std::enable_if_t<std::is_enum_v<T>, int> = 0>
+    rapidjson::Value generate_priv(const T& x) const
+    {
+        rapidjson::Value result;
+        result.SetString(enum_item_name(x), m_doc.GetAllocator());
         return result;
     }
 
@@ -105,6 +117,14 @@ private:
                 std::is_floating_point_v<T>, int> = 0>
     T parse_priv(const rapidjson::Value& node) const {
         return node.Get<T>();
+    }
+
+    template <
+            class T,
+            std::enable_if_t<
+                std::is_enum_v<T>, int> = 0>
+    T parse_priv(const rapidjson::Value& node) const {
+        return enum_item_value<T>(node.GetString());
     }
 
     template <

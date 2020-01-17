@@ -3,6 +3,8 @@
 #include "iterate_struct.h"
 #include <ostream>
 
+#include "enum_names/enum_names.h"
+
 namespace iterate_struct {
 
 template<class stream>
@@ -44,6 +46,14 @@ private:
     {
         maybePad(needPad);
         m_s << x;
+        return true;
+    }
+
+    template <class T, std::enable_if_t<std::is_enum_v<T>, int> = 0>
+    bool print_priv(const T& x, bool needPad) const
+    {
+        maybePad(needPad);
+        m_s << enum_item_name(x);
         return true;
     }
 

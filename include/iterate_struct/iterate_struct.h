@@ -107,18 +107,16 @@ inline auto asTuple(S& s, std::enable_if_t<has_iterate_struct_helper_v<std::deca
 } // namespace iterate_struct
 
 // See https://stackoverflow.com/questions/27765387/distributing-an-argument-in-a-variadic-macro
-#define ITERATE_STRUCT_ACCESS_FIELD(r, instance, field) , instance.field
+#define ITERATE_STRUCT_ACCESS_FIELD(r, instance, field) BOOST_PP_COMMA_IF(BOOST_PP_SUB(r, 2)) instance.field
 
-#define ITERATE_STRUCT_ACCESS_FIELDS(instance, first_field, ...) \
-    instance.first_field \
+#define ITERATE_STRUCT_ACCESS_FIELDS(instance, ...) \
     BOOST_PP_SEQ_FOR_EACH(ITERATE_STRUCT_ACCESS_FIELD, instance, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
 
 // https://stackoverflow.com/questions/27765387/distributing-an-argument-in-a-variadic-macro
 #define ITERATE_STRUCT_SIMPLE_STRINGIZE(x) #x
-#define ITERATE_STRUCT_STRINGIZE_FIELD(r, data, field) , ITERATE_STRUCT_SIMPLE_STRINGIZE(field)
+#define ITERATE_STRUCT_STRINGIZE_FIELD(r, data, field)BOOST_PP_COMMA_IF(BOOST_PP_SUB(r, 2)) ITERATE_STRUCT_SIMPLE_STRINGIZE(field)
 
-#define ITERATE_STRUCT_STRINGIZE_FIELDS(first_field, ...) \
-    #first_field \
+#define ITERATE_STRUCT_STRINGIZE_FIELDS(...) \
     BOOST_PP_SEQ_FOR_EACH(ITERATE_STRUCT_STRINGIZE_FIELD, UNUSED, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
 
 #define DESCRIBE_STRUCTURE_FIELDS(Struct, ...) \

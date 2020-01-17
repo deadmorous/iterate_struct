@@ -32,6 +32,7 @@ private:
             class T,
             std::enable_if_t<
                 std::is_integral_v<T> ||
+                std::is_enum_v<T> ||
                 std::is_floating_point_v<T> ||
                 std::is_same_v<T, std::string>, int> = 0>
     void collect_priv(const T&) const {
