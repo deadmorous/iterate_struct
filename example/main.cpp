@@ -1,16 +1,13 @@
 #include <iostream>
-#include "iterate_struct.h"
-#include "value_printer.h"
-#include "ptree_converter.h"
-#include "json_doc_converter.h"
-#include "json_doc_io.h"
-#include "collect_paths_struct.h"
-#include "collect_paths_json_doc.h"
+#include "iterate_struct/iterate_struct.h"
+#include "iterate_struct/value_printer.h"
+#include "iterate_struct/ptree_converter.h"
+#include "iterate_struct/json_doc_converter.h"
+#include "iterate_struct/json_doc_io.h"
+#include "iterate_struct/collect_paths_struct.h"
+#include "iterate_struct/collect_paths_json_doc.h"
 
 #include <boost/property_tree/json_parser.hpp>
-// #include <rapidjson/writer.h>
-#include <rapidjson/prettywriter.h>
-#include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/pointer.h>
 
 // Example of usage
