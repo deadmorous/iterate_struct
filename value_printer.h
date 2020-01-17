@@ -3,7 +3,7 @@
 #include "iterate_struct.h"
 #include <ostream>
 
-namespace itearate_struct {
+namespace iterate_struct {
 
 template<class stream>
 class value_printer
@@ -39,7 +39,7 @@ private:
         int& m_x;
     };
 
-    template <class T, std::enable_if_t<itearate_struct::has_output_operator_v<stream, T>, int> = 0>
+    template <class T, std::enable_if_t<iterate_struct::has_output_operator_v<stream, T>, int> = 0>
     bool print_priv(const T& x, bool needPad) const
     {
         maybePad(needPad);
@@ -47,7 +47,7 @@ private:
         return true;
     }
 
-    template <class T, std::enable_if_t<itearate_struct::has_iterate_struct_helper_v<T>, int> = 0>
+    template <class T, std::enable_if_t<iterate_struct::has_iterate_struct_helper_v<T>, int> = 0>
     bool print_priv(const T& x, bool needPad) const
     {
         if (needPad)
@@ -86,4 +86,9 @@ private:
     mutable int m_depth = 0;
 };
 
-} // namespace itearate_struct
+template<class stream, class T>
+inline void print(stream& s, const T& x) {
+    value_printer<stream>(s).print(x);
+}
+
+} // namespace iterate_struct

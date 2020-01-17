@@ -5,8 +5,9 @@
 
 #include <rapidjson/document.h>
 #include <list>
+#include <boost/assert.hpp>
 
-namespace itearate_struct {
+namespace iterate_struct {
 
 class json_doc_generator
 {
@@ -49,7 +50,7 @@ private:
         return result;
     }
 
-    template <class T, std::enable_if_t<itearate_struct::has_iterate_struct_helper_v<T>, int> = 0>
+    template <class T, std::enable_if_t<iterate_struct::has_iterate_struct_helper_v<T>, int> = 0>
     rapidjson::Value generate_priv(const T& x) const
     {
         m_nodes.emplace_back(rapidjson::kObjectType);
@@ -77,4 +78,71 @@ inline rapidjson::Document to_json_doc(const T& value) {
     return json_doc_generator::generate(value);
 }
 
-} // namespace itearate_struct
+
+
+class json_doc_parser
+{
+public:
+    template<class T>
+    inline void operator()(T& value, const char *name) const {
+        auto& node = *m_nodes.back();
+        auto it = node.FindMember(name);
+        BOOST_ASSERT(it != node.MemberEnd());
+        value = parse_priv<T>(it->value);
+    }
+
+    template<class T>
+    static T parse(const rapidjson::Document& document) {
+        return json_doc_parser().parse_priv<T>(document);
+    }
+
+private:
+
+    template <
+            class T,
+            std::enable_if_t<
+                std::is_integral_v<T> ||
+                std::is_floating_point_v<T>, int> = 0>
+    T parse_priv(const rapidjson::Value& node) const {
+        return node.Get<T>();
+    }
+
+    template <
+            class T,
+            std::enable_if_t<std::is_same_v<T, std::string>, int> = 0>
+    T parse_priv(const rapidjson::Value& node) const {
+        return node.GetString();
+    }
+
+    template <class T, std::enable_if_t<iterate_struct::has_iterate_struct_helper_v<T>, int> = 0>
+    T parse_priv(const rapidjson::Value& node) const
+    {
+        T result;
+        m_nodes.push_back(&node);
+        for_each(result, *this);
+        m_nodes.pop_back();
+        return result;
+    }
+
+    template <class T, std::enable_if_t<is_vector_v<T>, int> = 0>
+    T parse_priv(const rapidjson::Value& node) const
+    {
+        auto size = node.Size();
+        T result;
+        result.reserve(size);
+        auto array = node.GetArray();
+        for (auto& val : array) {
+            result.emplace_back(parse_priv<typename T::value_type>(val));
+        }
+        return result;
+    }
+
+    mutable std::vector<const rapidjson::Value*> m_nodes;
+};
+
+template<class T>
+inline T from_json_doc(const rapidjson::Document& document) {
+    return json_doc_parser::parse<T>(document);
+}
+
+} // namespace iterate_struct

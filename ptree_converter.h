@@ -8,7 +8,7 @@
 #include <list>
 #include <vector>
 
-namespace itearate_struct {
+namespace iterate_struct {
 
 class ptree_generator
 {
@@ -40,7 +40,7 @@ private:
         return result;
     }
 
-    template <class T, std::enable_if_t<itearate_struct::has_iterate_struct_helper_v<T>, int> = 0>
+    template <class T, std::enable_if_t<iterate_struct::has_iterate_struct_helper_v<T>, int> = 0>
     boost::property_tree::ptree generate_priv(const T& x) const
     {
         m_nodes.emplace_back();
@@ -96,7 +96,7 @@ private:
         return node.get_value<T>();
     }
 
-    template <class T, std::enable_if_t<itearate_struct::has_iterate_struct_helper_v<T>, int> = 0>
+    template <class T, std::enable_if_t<iterate_struct::has_iterate_struct_helper_v<T>, int> = 0>
     T parse_priv(const boost::property_tree::ptree& node) const
     {
         T result;
@@ -127,4 +127,4 @@ inline T from_ptree(const boost::property_tree::ptree& node) {
     return ptree_parser::parse<T>(node);
 }
 
-} // namespace itearate_struct
+} // namespace iterate_struct

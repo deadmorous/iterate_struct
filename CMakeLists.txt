@@ -13,4 +13,5 @@ add_executable(iterate_struct
     value_printer.h
     ptree_converter.h
     json_doc_converter.h
+    json_doc_io.h
     )

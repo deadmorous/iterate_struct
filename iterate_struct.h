@@ -7,7 +7,7 @@
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/variadic/to_seq.hpp>
 
-namespace itearate_struct {
+namespace iterate_struct {
 
 template <class S> class iterate_struct_helper;
 
@@ -104,7 +104,7 @@ inline auto asTuple(S& s, std::enable_if_t<has_iterate_struct_helper_v<std::deca
     return iterate_struct_helper<std::decay_t<S>>::asTuple(s);
 }
 
-} // namespace itearate_struct
+} // namespace iterate_struct
 
 // See https://stackoverflow.com/questions/27765387/distributing-an-argument-in-a-variadic-macro
 #define ITERATE_STRUCT_ACCESS_FIELD(r, instance, field) , instance.field
@@ -122,7 +122,7 @@ inline auto asTuple(S& s, std::enable_if_t<has_iterate_struct_helper_v<std::deca
     BOOST_PP_SEQ_FOR_EACH(ITERATE_STRUCT_STRINGIZE_FIELD, UNUSED, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
 
 #define DESCRIBE_STRUCTURE_FIELDS(Struct, ...) \
-    namespace itearate_struct { \
+    namespace iterate_struct { \
         template <> class iterate_struct_helper<Struct> { public: \
             using S = Struct; \
             static auto asTuple(S& s) { \
