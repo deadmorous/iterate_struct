@@ -14,4 +14,6 @@ add_executable(iterate_struct
     ptree_converter.h
     json_doc_converter.h
     json_doc_io.h
+    collect_paths_struct.h
+    collect_paths_json_doc.h
     )

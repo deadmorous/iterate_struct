@@ -4,6 +4,8 @@
 #include "ptree_converter.h"
 #include "json_doc_converter.h"
 #include "json_doc_io.h"
+#include "collect_paths_struct.h"
+#include "collect_paths_json_doc.h"
 
 #include <boost/property_tree/json_parser.hpp>
 // #include <rapidjson/writer.h>
@@ -73,9 +75,15 @@ int main()
 
     cout << "Bar read from JSON: using rapidjson" << endl;
     auto bar3 = iterate_struct::from_json_doc<Bar>(jsdoc);
-    iterate_struct::print(cout, bar);
+    iterate_struct::print(cout, bar3);
 
-    // auto doc2 = read_json_doc(cin);
+    cout << "Paths collected from Foo" << endl;
+    for (auto& path : iterate_struct::collect_paths(bar3))
+        cout << path << endl;
+
+    cout << "Paths collected from JSON (rapidjson)" << endl;
+    for (auto& path : iterate_struct::collect_paths(jsdoc))
+        cout << path << endl;
 
     return 0;
 }
