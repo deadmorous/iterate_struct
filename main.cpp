@@ -2,8 +2,12 @@
 #include "iterate_struct.h"
 #include "value_printer.h"
 #include "ptree_converter.h"
+#include "json_doc_converter.h"
 
 #include <boost/property_tree/json_parser.hpp>
+// #include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/ostreamwrapper.h>
 
 // Example of usage
 
@@ -54,6 +58,17 @@ int main()
     cout << "Bar read from JSON:" << endl;
     auto bar2 = itearate_struct::from_ptree<Bar>(pt);
     itearate_struct::value_printer(cout).print(bar2);
+
+    cout << "JSON generated with rapidjson" << endl;
+    auto jsdoc = itearate_struct::to_json_doc(bar);
+    rapidjson::OStreamWrapper osw(cout);
+    auto writer = rapidjson::PrettyWriter<
+            rapidjson::OStreamWrapper,
+            rapidjson::UTF8<>,
+            rapidjson::UTF8<>, rapidjson::CrtAllocator,
+            rapidjson::kWriteDefaultFlags
+            >(osw);
+    jsdoc.Accept(writer);
 
     return 0;
 }
