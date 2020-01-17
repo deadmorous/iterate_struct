@@ -10,14 +10,14 @@
 namespace my {
 
 struct Foo {
-    int bar = 1;
+    std::vector<int> bar = {1, 2, 3};
     std::string s = "s";
     double d = 2.3;
 };
 
 struct Bar {
     int x = 1;
-    Foo foo;
+    std::vector<Foo> foo {Foo(), Foo()};
 };
 
 } // namespace my
@@ -32,7 +32,7 @@ int main()
     using namespace my;
     Foo foo;
     auto t = itearate_struct::asTuple(foo);
-    get<0>(t) = 42;
+    get<0>(t)[1] = 42;
 
     const Foo& cfoo = foo;
     auto ct = itearate_struct::asTuple(cfoo);
@@ -42,7 +42,8 @@ int main()
     itearate_struct::value_printer(cout).print(foo);
 
     Bar bar;
-    bar.foo.s = "Hello";
+    bar.foo[0].s = "Hello";
+    bar.foo[1].bar[2] = 100500;
     cout << "Printing fields of Bar:" << endl;
     itearate_struct::value_printer(cout).print(bar);
 

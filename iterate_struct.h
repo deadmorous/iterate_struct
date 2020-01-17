@@ -2,6 +2,8 @@
 
 #include <tuple>
 #include <functional>
+#include <type_traits>
+#include <vector>
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/variadic/to_seq.hpp>
 
@@ -66,6 +68,15 @@ template<class T>
 struct has_iterate_struct_helper : decltype(detail::test_iterate_struct_helper<T>(0)){};
 template<class T>
 constexpr auto has_iterate_struct_helper_v = has_iterate_struct_helper<T>::value;
+
+template<class T>
+struct is_vector : public std::false_type {};
+
+template<class T>
+struct is_vector<std::vector<T>> : public std::true_type {};
+
+template<class T>
+constexpr auto is_vector_v = is_vector<T>::value;
 
 template <class NamedFieldVisitor>
 struct IndexedFieldVisitor

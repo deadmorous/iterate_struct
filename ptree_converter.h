@@ -4,6 +4,7 @@
 #include "iterate_struct.h"
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/lexical_cast.hpp>
 #include <list>
 #include <vector>
 
@@ -43,9 +44,21 @@ private:
     boost::property_tree::ptree generate_priv(const T& x) const
     {
         m_nodes.emplace_back();
-        itearate_struct::for_each(x, *this);
+        for_each(x, *this);
         auto result = m_nodes.back();
         m_nodes.pop_back();
+        return result;
+    }
+
+    template<class T>
+    boost::property_tree::ptree generate_priv(const std::vector<T>& x) const
+    {
+        boost::property_tree::ptree result;
+        for (std::size_t i=0, n=x.size(); i<n; ++i) {
+            result.put_child(
+                        boost::lexical_cast<std::string>(i),
+                        std::move(generate_priv(x[i])));
+        }
         return result;
     }
 
@@ -88,8 +101,21 @@ private:
     {
         T result;
         m_nodes.push_back(&node);
-        itearate_struct::for_each(result, *this);
+        for_each(result, *this);
         m_nodes.pop_back();
+        return result;
+    }
+
+    template <class T, std::enable_if_t<is_vector_v<T>, int> = 0>
+    T parse_priv(const boost::property_tree::ptree& node) const
+    {
+        T result;
+        for (std::size_t i=0; ; ++i) {
+            auto child = node.get_child_optional(boost::lexical_cast<std::string>(i));
+            if (child)
+                result.emplace_back(parse_priv<typename T::value_type>(child.get()));
+            else break;
+        }
         return result;
     }
 
