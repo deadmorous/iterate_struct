@@ -70,10 +70,10 @@ template<class T>
 constexpr auto has_iterate_struct_helper_v = has_iterate_struct_helper<T>::value;
 
 template<class T>
-struct is_vector : public std::false_type {};
+struct is_vector : std::false_type {};
 
 template<class T>
-struct is_vector<std::vector<T>> : public std::true_type {};
+struct is_vector<std::vector<T>> : std::true_type {};
 
 template<class T>
 constexpr auto is_vector_v = is_vector<T>::value;
@@ -134,3 +134,35 @@ inline auto asTuple(S& s, std::enable_if_t<has_iterate_struct_helper_v<std::deca
             }; \
         }; \
     }
+
+
+
+#define ITERATE_STRUCT_TEMPLATE_PARAMETER(r, data, elem) \
+    BOOST_PP_COMMA_IF(BOOST_PP_SUB(r,2)) BOOST_PP_TUPLE_ELEM(2, 0, elem) BOOST_PP_TUPLE_ELEM(2, 1, elem)
+
+#define ITERATE_STRUCT_TEMPLATE_PARAMETERS(seq) \
+    BOOST_PP_SEQ_FOR_EACH(ITERATE_STRUCT_TEMPLATE_PARAMETER, _, seq)
+
+#define ITERATE_STRUCT_TEMPLATE_ARGUMENT(r, data, elem) \
+    BOOST_PP_COMMA_IF(BOOST_PP_SUB(r,2)) BOOST_PP_TUPLE_ELEM(2, 1, elem)
+
+#define ITERATE_STRUCT_TEMPLATE_ARGUMENTS(seq) \
+    BOOST_PP_SEQ_FOR_EACH(ITERATE_STRUCT_TEMPLATE_ARGUMENT, _, seq)
+
+#define DESCRIBE_TEMPLATE_STRUCTURE_FIELDS(TemplateParameters, Struct, ...) \
+namespace iterate_struct { \
+    template <ITERATE_STRUCT_TEMPLATE_PARAMETERS(BOOST_PP_TUPLE_TO_SEQ(TemplateParameters))> \
+    class iterate_struct_helper<Struct<ITERATE_STRUCT_TEMPLATE_ARGUMENTS(BOOST_PP_TUPLE_TO_SEQ(TemplateParameters))>> { public: \
+        using S = Struct<ITERATE_STRUCT_TEMPLATE_ARGUMENTS(BOOST_PP_TUPLE_TO_SEQ(TemplateParameters))>; \
+        static auto asTuple(S& s) { \
+            return std::forward_as_tuple(ITERATE_STRUCT_ACCESS_FIELDS(s, __VA_ARGS__)); \
+        } \
+        static auto asTuple(const S& s) { \
+            return std::forward_as_tuple(ITERATE_STRUCT_ACCESS_FIELDS(s, __VA_ARGS__)); \
+        } \
+        static constexpr const char *fieldNames[] = { \
+            ITERATE_STRUCT_STRINGIZE_FIELDS(__VA_ARGS__) \
+        }; \
+    }; \
+}
+

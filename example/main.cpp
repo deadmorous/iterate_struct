@@ -1,4 +1,3 @@
-#include <iostream>
 #include "iterate_struct/iterate_struct.h"
 #include "iterate_struct/value_printer.h"
 #include "iterate_struct/ptree_converter.h"
@@ -9,6 +8,8 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <rapidjson/pointer.h>
+
+#include <iostream>
 
 // Example of usage
 
@@ -25,10 +26,33 @@ struct Bar {
     std::vector<Foo> foo {Foo(), Foo()};
 };
 
+template <class T, int i>
+struct W
+{
+    struct P
+    {
+        T x;
+    };
+};
+
+template<class T, int i>
+using WP = typename W<T, i>::P;
+
+template <class T, int i>
+struct WP2
+{
+    T x = i;
+};
+
 } // namespace my
 
 DESCRIBE_STRUCTURE_FIELDS(my::Foo, bar, s, d)
 DESCRIBE_STRUCTURE_FIELDS(my::Bar, x, foo)
+
+// Not working due to unresolvable template parameters
+// DESCRIBE_TEMPLATE_STRUCTURE_FIELDS(((class, T), (int, i)), WP, x)
+
+DESCRIBE_TEMPLATE_STRUCTURE_FIELDS(((class, T), (int, i)), my::WP2, x)
 
 using namespace std;
 
