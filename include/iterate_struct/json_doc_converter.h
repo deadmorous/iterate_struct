@@ -96,11 +96,16 @@ class json_doc_parser
 {
 public:
     template<class T>
-    inline void operator()(T& value, const char *name) const {
+    inline void operator()(T& value, const char *name) const
+    {
         auto& node = *m_nodes.back();
+        if (!node.IsObject())
+            return;
         auto it = node.FindMember(name);
-        BOOST_ASSERT(it != node.MemberEnd());
-        value = parse_priv<T>(it->value);
+        if(it != node.MemberEnd()); {
+            bool nnnnn = it->value.IsNull();
+            value = parse_priv<T>(it->value);
+        }
     }
 
     template<class T>
@@ -139,7 +144,8 @@ private:
     {
         T result;
         m_nodes.push_back(&node);
-        for_each(result, *this);
+        if (!node.IsNull() && node.IsObject())
+            for_each(result, *this);
         m_nodes.pop_back();
         return result;
     }

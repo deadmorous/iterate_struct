@@ -1,7 +1,6 @@
 #pragma once
 
-#include <istream>
-#include <ostream>
+#include <fstream>
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
@@ -21,6 +20,17 @@ inline rapidjson::Document read_json_doc(std::istream& s)
     return document;
 }
 
+inline rapidjson::Document read_json_doc(const std::string& fileName)
+{
+    std::ifstream is(fileName);
+    if (!is.is_open())
+        throw std::runtime_error(std::string("Failed to open input file '")+fileName+"'");
+    // is.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    return read_json_doc(is);
+}
+
+
+
 inline void write_json_doc(std::ostream& s, const rapidjson::Document& document)
 {
     rapidjson::OStreamWrapper osw(s);
@@ -31,4 +41,13 @@ inline void write_json_doc(std::ostream& s, const rapidjson::Document& document)
             rapidjson::kWriteDefaultFlags
             >(osw);
     document.Accept(writer);
+}
+
+inline void write_json_doc(const std::string& fileName, const rapidjson::Document& document)
+{
+    std::ofstream os(fileName);
+    if (!os.is_open())
+        throw std::runtime_error(std::string("Failed to open input file '")+fileName+"'");
+    os.exceptions (std::ofstream::failbit | std::ofstream::badbit);
+    write_json_doc(os, document);
 }
