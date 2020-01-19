@@ -56,7 +56,7 @@ private:
     {
         maybePad(needPad);
         m_s << x;
-        if (m_cb)
+        if (!needPad && m_cb)
             m_cb(current_path());
         return true;
     }
@@ -66,7 +66,7 @@ private:
     {
         maybePad(needPad);
         m_s << enum_item_name(x);
-        if (m_cb)
+        if (!needPad && m_cb)
             m_cb(current_path());
         return true;
     }
@@ -89,6 +89,7 @@ private:
     {
         maybePad(needPad);
         m_s << "[" << std::endl;
+        auto leaves = true;
         {
             scoped_inc scinc(m_depth);
             std::size_t i = 0;
@@ -96,11 +97,18 @@ private:
                 m_current_path_items.push_back(boost::lexical_cast<std::string>(i++));
                 if (print_priv(xi, true))
                     m_s << std::endl;
+                else
+                    leaves = false;
+                if (!leaves && m_cb)
+                    m_cb(current_path());
                 m_current_path_items.pop_back();
             }
         }
         maybePad(true);
-        m_s << ']' << std::endl;
+        m_s << ']';
+        if (leaves && m_cb)
+            m_cb(current_path());
+        m_s << std::endl;
         return false;
     }
 

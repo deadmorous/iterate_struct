@@ -20,14 +20,35 @@ public:
     }
 
 private:
-    void collect_priv(const rapidjson::Value& value) const {
+    static bool is_leaf(const rapidjson::Value& v)
+    {
+        if (v.IsNumber() || v.IsString())
+            return true;
+        else if (v.IsArray()) {
+            auto a = v.GetArray();
+            if (a.Size() == 0)
+                return true;
+            else {
+                auto& v = *a.begin();
+                return v.IsNumber() || v.IsArray();
+            }
+        }
+        return true;
+    }
+
+    void collect_priv(const rapidjson::Value& value) const
+    {
         if (value.IsArray()) {
             auto a = value.GetArray();
             auto n = a.Size();
             for (decltype(n) i=0; i<n; ++i) {
-                m_current_path_items.push_back(boost::lexical_cast<std::string>(i));
-                collect_priv(a[i]);
-                m_current_path_items.pop_back();
+                if (is_leaf(value))
+                    m_paths.push_back(current_path());
+                else {
+                    m_current_path_items.push_back(boost::lexical_cast<std::string>(i));
+                    collect_priv(a[i]);
+                    m_current_path_items.pop_back();
+                }
             }
         }
         else if (value.IsObject()) {

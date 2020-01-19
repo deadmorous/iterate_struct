@@ -35,6 +35,28 @@ private:
                 std::is_enum_v<T> ||
                 std::is_floating_point_v<T> ||
                 std::is_same_v<T, std::string>, int> = 0>
+    static constexpr bool is_leaf(const T&) {
+        return true;
+    }
+
+    template <class T, std::enable_if_t<iterate_struct::has_iterate_struct_helper_v<T>, int> = 0>
+    static constexpr bool is_leaf(const T&) {
+        return false;
+    }
+
+    template<class T>
+    static constexpr bool is_leaf(const std::vector<T>&)
+    {
+        return is_leaf(T());
+    }
+
+    template <
+            class T,
+            std::enable_if_t<
+                std::is_integral_v<T> ||
+                std::is_enum_v<T> ||
+                std::is_floating_point_v<T> ||
+                std::is_same_v<T, std::string>, int> = 0>
     void collect_priv(const T&) const {
         m_paths.push_back(current_path());
     }
@@ -48,9 +70,13 @@ private:
     void collect_priv(const std::vector<T>& x) const
     {
         for (std::size_t i=0, n=x.size(); i<n; ++i) {
-            m_current_path_items.push_back(boost::lexical_cast<std::string>(i));
-            collect_priv(x[i]);
-            m_current_path_items.pop_back();
+            if (is_leaf(x))
+                m_paths.push_back(current_path());
+            else {
+                m_current_path_items.push_back(boost::lexical_cast<std::string>(i));
+                collect_priv(x[i]);
+                m_current_path_items.pop_back();
+            }
         }
     }
 
