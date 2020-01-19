@@ -116,13 +116,34 @@ private:
     template <
             class T,
             std::enable_if_t<
-                std::is_integral_v<T> ||
+                std::is_same_v<T, bool>, int> = 0>
+    T parse_priv(const rapidjson::Value& node) const
+    {
+        if (!node.IsBool())
+            throw std::runtime_error("Value in JSON document has an invalid type, expected a boolean");
+        return node.GetBool();
+    }
+
+    template <
+            class T,
+            std::enable_if_t<
+                !std::is_same_v<T, bool> && std::is_integral_v<T>, int> = 0>
+    T parse_priv(const rapidjson::Value& node) const
+    {
+        if (!node.IsInt())
+            throw std::runtime_error("Value in JSON document has an invalid type, expected an integer");
+        return node.GetInt();
+    }
+
+    template <
+            class T,
+            std::enable_if_t<
                 std::is_floating_point_v<T>, int> = 0>
     T parse_priv(const rapidjson::Value& node) const
     {
-        if (!node.Is<T>())
-            throw std::runtime_error("Value in JSON document has an invalid type");
-        return node.Get<T>();
+        if (!node.IsNumber())
+            throw std::runtime_error("Value in JSON document has an invalid type, expected a number");
+        return node.GetDouble();
     }
 
     template <

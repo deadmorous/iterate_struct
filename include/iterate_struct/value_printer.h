@@ -92,15 +92,16 @@ private:
         auto leaves = true;
         {
             scoped_inc scinc(m_depth);
-            std::size_t i = 0;
-            for (auto& xi : x) {
-                m_current_path_items.push_back(boost::lexical_cast<std::string>(i++));
-                if (print_priv(xi, true))
-                    m_s << std::endl;
-                else
+            for (std::size_t i=0, n=x.size(); i<n; ++i) {
+                auto& xi = x[i];
+                m_current_path_items.push_back(boost::lexical_cast<std::string>(i));
+                if (!print_priv(xi, true))
                     leaves = false;
-                if (!leaves && m_cb)
-                    m_cb(current_path());
+
+                // Separate aggregate array items with an extra newline
+                if (leaves || i+1<n)
+                    m_s << std::endl;
+
                 m_current_path_items.pop_back();
             }
         }
