@@ -102,10 +102,8 @@ public:
         if (!node.IsObject())
             return;
         auto it = node.FindMember(name);
-        if(it != node.MemberEnd()); {
-            bool nnnnn = it->value.IsNull();
+        if(it != node.MemberEnd())
             value = parse_priv<T>(it->value);
-        }
     }
 
     template<class T>
@@ -120,7 +118,10 @@ private:
             std::enable_if_t<
                 std::is_integral_v<T> ||
                 std::is_floating_point_v<T>, int> = 0>
-    T parse_priv(const rapidjson::Value& node) const {
+    T parse_priv(const rapidjson::Value& node) const
+    {
+        if (!node.Is<T>())
+            throw std::runtime_error("Value in JSON document has an invalid type");
         return node.Get<T>();
     }
 
@@ -128,14 +129,20 @@ private:
             class T,
             std::enable_if_t<
                 std::is_enum_v<T>, int> = 0>
-    T parse_priv(const rapidjson::Value& node) const {
+    T parse_priv(const rapidjson::Value& node) const
+    {
+        if (!node.IsString())
+            throw std::runtime_error("Value in JSON document has an invalid type, expected a string identifying an enumeration value");
         return enum_item_value<T>(node.GetString());
     }
 
     template <
             class T,
             std::enable_if_t<std::is_same_v<T, std::string>, int> = 0>
-    T parse_priv(const rapidjson::Value& node) const {
+    T parse_priv(const rapidjson::Value& node) const
+    {
+        if (!node.IsString())
+            throw std::runtime_error("Value in JSON document has an invalid type, expected a string");
         return node.GetString();
     }
 
@@ -156,6 +163,8 @@ private:
         auto size = node.Size();
         T result;
         result.reserve(size);
+        if (!node.IsArray())
+            throw std::runtime_error("Value in JSON document has an invalid type, expected an array");
         auto array = node.GetArray();
         for (auto& val : array) {
             result.emplace_back(parse_priv<typename T::value_type>(val));

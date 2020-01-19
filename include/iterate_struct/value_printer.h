@@ -5,25 +5,35 @@
 
 #include "enum_names/enum_names.h"
 
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/join.hpp>
+
 namespace iterate_struct {
 
 template<class stream>
 class value_printer
 {
 public:
-    value_printer(stream& s) : m_s(s) {}
+    value_printer(
+            stream& s,
+            const std::function<void(const std::string&)>& cb = std::function<void(const std::string&)>()) :
+        m_s(s), m_cb(cb)
+    {}
 
     template<class T>
     void operator()(T& value, const char *name) const
     {
         maybePad(true);
         m_s << name << " = ";
+        m_current_path_items.push_back(name);
         if (print_priv(value, false))
             m_s << std::endl;
+        m_current_path_items.pop_back();
     }
 
     template <class T>
-    void print(const T& x) const {
+    void print(const T& x) const
+    {
         print_priv(x, true);
     }
 
@@ -46,6 +56,8 @@ private:
     {
         maybePad(needPad);
         m_s << x;
+        if (m_cb)
+            m_cb(current_path());
         return true;
     }
 
@@ -54,6 +66,8 @@ private:
     {
         maybePad(needPad);
         m_s << enum_item_name(x);
+        if (m_cb)
+            m_cb(current_path());
         return true;
     }
 
@@ -63,6 +77,7 @@ private:
         if (needPad)
             for_each(x, *this);
         else {
+            m_s << std::endl;
             scoped_inc scinc(m_depth);
             for_each(x, *this);
         }
@@ -76,9 +91,12 @@ private:
         m_s << "[" << std::endl;
         {
             scoped_inc scinc(m_depth);
+            std::size_t i = 0;
             for (auto& xi : x) {
+                m_current_path_items.push_back(boost::lexical_cast<std::string>(i++));
                 if (print_priv(xi, true))
                     m_s << std::endl;
+                m_current_path_items.pop_back();
             }
         }
         maybePad(true);
@@ -93,12 +111,22 @@ private:
     }
 
     stream& m_s;
+    std::function<void(const std::string&)> m_cb;
     mutable int m_depth = 0;
+
+    std::string current_path() const {
+        return std::string("/") + boost::join(m_current_path_items, "/");
+    }
+
+    mutable std::vector<std::string> m_current_path_items;
 };
 
 template<class stream, class T>
-inline void print(stream& s, const T& x) {
-    value_printer<stream>(s).print(x);
+inline void print(
+        stream& s, const T& x,
+        const std::function<void(const std::string&)>& cb = std::function<void(const std::string&)>())
+{
+    value_printer<stream>(s, cb).print(x);
 }
 
 } // namespace iterate_struct

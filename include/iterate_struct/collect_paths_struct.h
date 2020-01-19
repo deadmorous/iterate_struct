@@ -55,7 +55,7 @@ private:
     }
 
     std::string current_path() const {
-        return boost::join(m_current_path_items, "/");
+        return std::string("/") + boost::join(m_current_path_items, "/");
     }
 
     mutable std::vector<std::string> m_current_path_items;
